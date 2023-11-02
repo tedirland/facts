@@ -8,12 +8,6 @@ load_dotenv()
 
 embeddings = OpenAIEmbeddings()
 
-emb = embeddings.embed_query("Hi there")
-
-print(emb)
-
-
-
 text_splitter = CharacterTextSplitter(
     separator="\n",
     chunk_size =200,
@@ -24,6 +18,17 @@ text_splitter = CharacterTextSplitter(
 loader = TextLoader('facts.txt')
 docs = loader.load_and_split(text_splitter=text_splitter)
 
-for doc in docs:
-    print(doc.page_content)
+db = Chroma.from_documents(
+    docs,
+    embedding=embeddings,
+    persist_directory="emb"
+)
+
+results = db.similarity_search(
+    "What is an interesting fact about the English language?",
+    # Used to specify how many matches you want
+    )
+
+for result in results:
     print("\n")
+    print(result.page_content)
